@@ -12,7 +12,7 @@ public class ComidaController {
     private ComidaService comidaService;
 
     public ComidaController(ComidaService comidaService){
-        comidaService = this.comidaService;
+        this.comidaService = comidaService;
     }
 
 
