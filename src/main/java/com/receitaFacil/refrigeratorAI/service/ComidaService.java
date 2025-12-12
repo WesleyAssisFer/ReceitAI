@@ -11,7 +11,7 @@ public class ComidaService {
     private ComidaRepository comidaRepository;
 
     public ComidaService(ComidaRepository comidaRepository){
-    comidaRepository = this.comidaRepository;
+    this. comidaRepository = comidaRepository;
     }
 
     // Listar todos
