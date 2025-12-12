@@ -2,10 +2,11 @@ package com.receitaFacil.refrigeratorAI.service;
 
 import com.receitaFacil.refrigeratorAI.model.ComidaModel;
 import com.receitaFacil.refrigeratorAI.repository.ComidaRepository;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
-
+@Service
 public class ComidaService {
 
     private ComidaRepository comidaRepository;
@@ -47,12 +48,15 @@ public class ComidaService {
         else {
             return Optional.empty();
         }
-
     }
 
     // Deletar
-    public void deletar(Long id){
-        comidaRepository.deleteById(id);
+    public boolean deletar(Long id){
+       if(comidaRepository.existsById(id)){
+           comidaRepository.deleteById(id);
+           return true;
+       }
+       return false;
     }
 
 }

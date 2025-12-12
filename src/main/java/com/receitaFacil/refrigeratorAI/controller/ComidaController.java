@@ -32,6 +32,26 @@ public class ComidaController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    // Salvar / Atualizar
+    @PostMapping
+    public ResponseEntity<ComidaModel> salvarComida(@RequestBody ComidaModel comidaModel){
+      return ResponseEntity.ok(comidaService.salvarComida(comidaModel));
+    }
 
+    // Atulizar Comida
+    @PutMapping("{id}")
+    public ResponseEntity<ComidaModel> atualizarComida(@PathVariable Long id, @RequestBody ComidaModel comidaModel){
+       return comidaService.atualizarComida(id, comidaModel)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
 
+    // Deletar
+    @DeleteMapping("{id}")
+    public ResponseEntity<?> deletarComida(@PathVariable Long id){
+        if(comidaService.deletar(id)){
+              return ResponseEntity.ok("Id " + id + " deletado com sucesso");
+        }
+        return ResponseEntity.notFound().build();
+    }
 }
