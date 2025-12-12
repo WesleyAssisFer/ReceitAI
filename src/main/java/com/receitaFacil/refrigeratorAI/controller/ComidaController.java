@@ -32,7 +32,7 @@ public class ComidaController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    // Salvar / Atualizar
+    // Salvar / Criar
     @PostMapping
     public ResponseEntity<ComidaModel> salvarComida(@RequestBody ComidaModel comidaModel){
       return ResponseEntity.ok(comidaService.salvarComida(comidaModel));
