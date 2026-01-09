@@ -1,35 +1,51 @@
 package com.receitaFacil.refrigeratorAI.service;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.receitaFacil.refrigeratorAI.config.WebClientConfig;
+import com.receitaFacil.refrigeratorAI.model.ComidaModel;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
 
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
-// Aqui é a conexao com a ChatGPT
 public class OpenAIService {
-    private final WebClient webClient;
-    private final String apiKey;
+   private final ComidaService comidaService;
+   private final WebClient webClient;
 
-    public OpenAIService(WebClient webClient, @Value("${openai.api.key}") String apiKey){
-        this.webClient = webClient;
-        this.apiKey = apiKey;
+    public OpenAIService(ComidaService comidaService, WebClient webClient){
+       this.comidaService = comidaService;
+       this.webClient = webClient;
     }
 
-    public String enviarPrompt(String prompt){
-        Map<String, Object> corpoDoChat = Map.of(
-                "model","gpt-4.1-mini",
-                "input", prompt
-        );
+    public Mono<String> gerarReceita(){
+        // Pegar Somente o nomes do ComidaModel
+        List<String> listarNomesComida = comidaService.listar()
+                .stream()
+                .map(ComidaModel::getNome)
+                .toList();
+
+        // organizar os Ingredientes(tirar da lista e colocar virgula)
+        String ingredientesOrganizado = listarNomesComida.stream()
+                .collect(Collectors.joining(", "));
+
+        // Criar o prompt para ser incerido no body do crul
+        String prompt = """
+                Com esses ingredientes:
+                %s
+               Monte uma receita, passando um passo a passo.
+               """.formatted(ingredientesOrganizado);
+
+        Map<Object, String> dadosDoCorpo = Map.of("model","gpt-4.1-mini", "input", prompt);
 
         return webClient.post()
-                .header("Authorization", "Bearer " + apiKey)
-                .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(corpoDoChat)
+                .bodyValue(dadosDoCorpo)
                 .retrieve()
-                .bodyToMono(String.class)
-                .block(); // usando o block vai deixar sicrono
+                .bodyToMono(String.class);
     }
+
 }
