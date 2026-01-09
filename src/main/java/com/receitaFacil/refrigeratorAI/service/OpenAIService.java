@@ -1,9 +1,8 @@
 package com.receitaFacil.refrigeratorAI.service;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.receitaFacil.refrigeratorAI.config.WebClientConfig;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.receitaFacil.refrigeratorAI.model.ComidaModel;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
@@ -16,6 +15,7 @@ import java.util.stream.Collectors;
 public class OpenAIService {
    private final ComidaService comidaService;
    private final WebClient webClient;
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     public OpenAIService(ComidaService comidaService, WebClient webClient){
        this.comidaService = comidaService;
@@ -42,10 +42,25 @@ public class OpenAIService {
 
         Map<Object, String> dadosDoCorpo = Map.of("model","gpt-4.1-mini", "input", prompt);
 
-        return webClient.post()
+      return webClient.post()
                 .bodyValue(dadosDoCorpo)
                 .retrieve()
-                .bodyToMono(String.class);
-    }
+                .bodyToMono(String.class)
+                .map(this::extrairTexto);
 
+    }
+    private String extrairTexto (String jsonCompleto){
+        try {
+            JsonNode acessarJson = objectMapper.readTree(jsonCompleto);
+            return acessarJson
+                    .path("output")
+                    .get(0)
+                    .path("content")
+                    .get(0)
+                    .path("text")
+                    .asText();
+        }catch (Exception exception){
+            throw new RuntimeException("Erro ao extrair texto da OpenAI ", exception);
+        }
+    }
 }

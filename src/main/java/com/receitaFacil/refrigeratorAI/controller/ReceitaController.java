@@ -23,5 +23,6 @@ public class ReceitaController {
     public Mono<ResponseEntity<String>> enviarReceita(){
         return openAIService.gerarReceita()
                 .map(ResponseEntity::ok);
+
     }
 }
