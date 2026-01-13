@@ -26,7 +26,7 @@ public class OpenAIService {
         // Pegar Somente o nomes do ComidaModel
         List<String> listarNomesComida = comidaService.listar()
                 .stream()
-                .map(ComidaModel::getNome)
+                .map(comida -> "Ingrediente: " + comida.getNome() + " Quantidade:" + comida.getQuantidade() )
                 .toList();
 
         // organizar os Ingredientes(tirar da lista e colocar virgula)
@@ -35,12 +35,13 @@ public class OpenAIService {
 
         // Criar o prompt para ser incerido no body do crul
         String prompt = """
-                Com esses ingredientes:
+                Com apenas esses ingredientes:
                 %s
-               Monte uma receita, passando um passo a passo.
+               Monte uma receita, passando um passo a passo (Caso precise de outro ingredinetes
+               coloque como opcional).
                """.formatted(ingredientesOrganizado);
 
-        Map<Object, String> dadosDoCorpo = Map.of("model","gpt-4.1-mini", "input", prompt);
+          Map<Object, String> dadosDoCorpo = Map.of("model","gpt-4.1-mini", "input", prompt);
 
       return webClient.post()
                 .bodyValue(dadosDoCorpo)
